@@ -10,13 +10,15 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection="books")
 public class Book {
 	
-	@Id
-	private String id;
-	@TextIndexed
-	private String title;
+	public static final String KEY_BOOK_ID = "id";
+	@Id private String id;
+	
+	public static final String KEY_BOOK_TITLE = "title";
+	@TextIndexed private String title;
+	
+	@Indexed private Float  score;
+	
 	private String author;
-	@Indexed
-	private Float  score;
 	private String description;
 	private Binary cover;
 	    

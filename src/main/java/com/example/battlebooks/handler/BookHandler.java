@@ -2,6 +2,8 @@ package com.example.battlebooks.handler;
 
 import static reactor.core.publisher.Mono.error;
 
+import java.util.Optional;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +43,7 @@ public class BookHandler {
 
     public Mono<ServerResponse> getBookById(ServerRequest request) {
         String id = request.pathVariable("id");
-        if (id == null) {
-        	return badRequest;
-        }
+        
         Mono<Book> found = repository.findById(id);
         
         return found.flatMap(book -> ServerResponse.ok()
@@ -51,7 +51,7 @@ public class BookHandler {
                         .body(BodyInserters.fromValue(book)))
                     .switchIfEmpty(notFound);
     }
-    
+        
     public Mono<ServerResponse> createBook(ServerRequest request) {
         Mono<Book> bookToCreate = request.bodyToMono(Book.class);
         return bookToCreate.flatMap(item -> 

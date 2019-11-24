@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -22,10 +21,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
-
-import com.example.battlebooks.handler.BookHandler;
 import com.example.battlebooks.handler.FlashcardHandler;
-import com.example.battlebooks.model.Book;
 import com.example.battlebooks.model.Flashcard;
 import com.example.battlebooks.model.QuestionCategory;
 import com.example.battlebooks.model.QuestionType;
@@ -33,8 +29,6 @@ import com.example.battlebooks.repository.FlashcardRepository;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-
 
 @ExtendWith(SpringExtension.class)
 @AutoConfigureWebTestClient
@@ -70,10 +64,9 @@ public class FlashcardHandlerTest {
 				"Twelve", 
 				"The Only Road"),
 		new Flashcard("0005", QuestionType.CONTENT, QuestionCategory.DATE,
-				"In Port Chicago 50, when did a massive explosion rock tthe segregated Navy base at Port Chicago, California, killing more than 300 sailors?",
+				"In Port Chicago 50, when did a massive explosion rock the segregated Navy base at Port Chicago, California, killing more than 300 sailors?",
 				"July 17, 1944", 
-				"Port Chicago 50"),
-		
+				"Port Chicago 50"),		
 		new Flashcard("0006", QuestionType.AUTHOR, null,
 				"Who is the author of the book The Only Road",
 				"Alexandra Diaz", 
@@ -195,7 +188,12 @@ public class FlashcardHandlerTest {
         .expectStatus().isOk()
         .expectHeader().contentType(MediaType.APPLICATION_JSON)
         .expectBodyList(Flashcard.class)
-        .hasSize(1);
+        .hasSize(1)
+        .consumeWith(response -> {
+            List<Flashcard> cards = response.getResponseBody();
+            cards.forEach(card -> 
+            	assertTrue((equalStrings(card.getCategory(), QuestionCategory.CHARACTER) && equalStrings(card.getBookTitle(),"Frogkisser!"))));
+        });
     }
     
     @Test
@@ -210,7 +208,7 @@ public class FlashcardHandlerTest {
         .exchange()
         .expectHeader().contentType(MediaType.APPLICATION_JSON)
         .expectBodyList(Flashcard.class)
-        .consumeWith((response)-> {
+        .consumeWith( response -> {
             List<Flashcard> cards = response.getResponseBody();
             cards.forEach(card -> 
             	assertTrue(
@@ -299,4 +297,48 @@ public class FlashcardHandlerTest {
                 .exchange()
                 .expectStatus().is4xxClientError();    
     }
+    
+    @Test
+    public void testCreateBook() {
+    	 Flashcard card = new Flashcard()
+ 	    		.setId("0008")
+ 	    		.setCategory(QuestionCategory.PLACE)
+ 	    		.setType(QuestionType.CONTENT)
+ 	    		.setQuestion("In Port Chicago 50, in which state is the Navy base located?")
+ 	    		.setAnswer("California")
+ 	    		.setBookTitle("Port Chicago 50");
+ 	    		
+    	 
+    	 Flashcard created = webTestClient.post()
+            .uri(FlashcardHandler.API_CARDS)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(Mono.just(card), Flashcard.class)
+            .exchange()
+            .expectStatus().isCreated()
+            .expectBody(Flashcard.class)
+            .returnResult()
+            .getResponseBody();
+    	 
+    	 assertTrue(created.getId().equals(card.getId()) && created.getAnswer().equals(card.getAnswer()));      
+    }
+    
+    @Test
+    public void testCreateBook_where_bookTitle_is_invalid() {
+    	 Flashcard card = new Flashcard()
+ 	    		.setId("0008")
+ 	    		.setCategory(QuestionCategory.PLACE)
+ 	    		.setType(QuestionType.CONTENT)
+ 	    		.setQuestion("In Port Chicago 50, in which state is the Navy base located?")
+ 	    		.setAnswer("California")
+ 	    		.setBookTitle("This book does not exist");
+ 	    		
+    	 
+    	 webTestClient.post()
+            .uri(FlashcardHandler.API_CARDS)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(Mono.just(card), Flashcard.class)
+            .exchange()
+            .expectStatus().isBadRequest();    
+    }
+    
 }

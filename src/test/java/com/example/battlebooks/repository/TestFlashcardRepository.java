@@ -36,14 +36,14 @@ public class TestFlashcardRepository {
 	
 	List<Flashcard> cardList = Arrays.asList(
 		new Flashcard("0001", QuestionType.IN_WHICH_BOOK, null,
-				"In which book, a CHARACTER name Fletcher is chased from his village for a crime he did not commit?",
+				"In which book, a character name Fletcher is chased from his village for a crime he did not commit?",
 				"The Novice by Taran Matharu", "The Novice"),
 		new Flashcard("0002", QuestionType.CONTENT, QuestionCategory.CHARACTER,
 				"In Frogkisser!, what is the question Anya was asked the most frequently, later in her life?",
 				"How is it possible to have two stepparents and no actual parents?", 
 				"Frogkisser!"),
 		new Flashcard("0003", QuestionType.IN_WHICH_BOOK, null,
-				"In which book, a CHARACTER named Morven is turned to a Frog after being kissed?",
+				"In which book, a character named Morven is turned to a Frog after being kissed?",
 				"Frogkisser!",
 				"Frogkisser!"),
 		new Flashcard("0004", QuestionType.CONTENT, QuestionCategory.CHARACTER,
@@ -55,7 +55,7 @@ public class TestFlashcardRepository {
 				"July 17, 1944", 
 				"Port Chicago 50"),
 		new Flashcard("0006", QuestionType.AUTHOR, null,
-				"Who is the AUTHOR of the book The Only Road",
+				"Who is the author of the book The Only Road",
 				"Alexandra Diaz", 
 				"The Only Road")
 	);

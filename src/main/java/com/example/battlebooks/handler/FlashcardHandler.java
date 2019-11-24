@@ -7,20 +7,17 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.example.battlebooks.model.Book;
 import com.example.battlebooks.model.Flashcard;
 import com.example.battlebooks.model.QuestionType;
 import com.example.battlebooks.repository.FlashcardRepository;
@@ -107,11 +104,13 @@ public class FlashcardHandler {
     }
     
     public Mono<ServerResponse> createCard(ServerRequest request) {
+    	
+    	//TODO: check the book title in the card to create actually exists
         Mono<Flashcard> cardToCreate = request.bodyToMono(Flashcard.class);
-        return cardToCreate.flatMap(item -> 
+        return cardToCreate.flatMap(book -> 
             ServerResponse.created(null)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(repository.save(item),Flashcard.class));
+                .body(repository.save(book),Flashcard.class));
     }
    
     public Mono<ServerResponse> deleteCard(ServerRequest request) {

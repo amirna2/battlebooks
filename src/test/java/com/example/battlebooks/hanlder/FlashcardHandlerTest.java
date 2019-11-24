@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -21,13 +23,16 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import com.example.battlebooks.handler.BookHandler;
 import com.example.battlebooks.handler.FlashcardHandler;
+import com.example.battlebooks.model.Book;
 import com.example.battlebooks.model.Flashcard;
 import com.example.battlebooks.model.QuestionCategory;
 import com.example.battlebooks.model.QuestionType;
 import com.example.battlebooks.repository.FlashcardRepository;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 
@@ -38,6 +43,9 @@ import reactor.test.StepVerifier;
 @ActiveProfiles("dev")
 @TestInstance(Lifecycle.PER_CLASS)
 public class FlashcardHandlerTest {
+	
+    final Logger logger = LogManager.getLogger(BookHandlerTest.class.getSimpleName());
+
 	@Autowired
     WebTestClient webTestClient;
 	
@@ -255,4 +263,40 @@ public class FlashcardHandlerTest {
         .hasSize(1);
     }
     
+    @Test
+    public void testUpdateFlashCard() {
+    	Flashcard card = new Flashcard("0007", QuestionType.CONTENT, QuestionCategory.OBJECT,
+				"In Frogkisser!, What color kirtle is Anya wearing on her coranation day",
+				"red", 
+				"Frogkisser!");
+    	
+    	Flashcard updated = webTestClient.put()
+                .uri(FlashcardHandler.API_CARDS.concat("/{id}"), card.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(Mono.just(card), Flashcard.class)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Flashcard.class)
+                .returnResult()
+                .getResponseBody();    
+         logger.info("testUpdateBook: updated book {}",updated.toString());   
+       	 assertTrue(equalStrings(card.getCategory(), updated.getCategory()) && equalStrings(card.getAnswer(), updated.getAnswer()));      
+    }
+    
+    @Test
+    public void testUpdateFlashCard_when_cardIsNotFound() {
+    	Flashcard card = new Flashcard("9999", QuestionType.CONTENT, QuestionCategory.OBJECT,
+				"In Frogkisser!, What color kirtle is Anya wearing on her coranation day",
+				"red", 
+				"Frogkisser!");
+    	
+    	webTestClient.put()
+                .uri(FlashcardHandler.API_CARDS.concat("/{id}"), card.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(Mono.just(card), Flashcard.class)
+                .exchange()
+                .expectStatus().is4xxClientError();    
+    }
 }

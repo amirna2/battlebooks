@@ -20,6 +20,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.example.battlebooks.model.Book;
 import com.example.battlebooks.model.Flashcard;
 import com.example.battlebooks.model.QuestionType;
 import com.example.battlebooks.repository.FlashcardRepository;
@@ -129,20 +130,13 @@ public class FlashcardHandler {
 	    
 	    final String notFoundReason = "Flashcard "+id+" does not exist";
 	    
-	    /*
-	     * find the card, return not found if card doesn't exist
-	     * or update (save) the requested card and return it if saved
-	     * otherwise, return a server error
-	     */
-	    return repository
-	    		.findById(id).log("Found Card: ")
-				.switchIfEmpty(error(new ResponseStatusException(HttpStatus.NOT_FOUND, notFoundReason)))
-				.or(request.bodyToMono(Flashcard.class))
-	    		.flatMap(cardToUpdate -> repository.save(cardToUpdate))
-			    .flatMap(savedCard -> 
-			    			ServerResponse.ok()
-			    			.contentType(MediaType.APPLICATION_JSON)
-			    			.body(BodyInserters.fromValue(savedCard)))
-			    .switchIfEmpty(serverError);
-	}
+	    return repository.findById(id)
+	    		  .switchIfEmpty(error(new ResponseStatusException(HttpStatus.NOT_FOUND, notFoundReason)))
+	    		  .then(request.bodyToMono(Flashcard.class))
+	    		  .flatMap( update -> repository.save(update))
+	    		  .flatMap(saved -> ServerResponse.ok()
+						.contentType(MediaType.APPLICATION_JSON)
+						.body(BodyInserters.fromValue(saved)))
+				  .switchIfEmpty(serverError);
+    }
 }

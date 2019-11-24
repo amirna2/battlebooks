@@ -125,17 +125,17 @@ public class TestFlashcardRepository {
     
 	@Test
     public void addNewCard() {
-		Flashcard qna = new Flashcard("9999", QuestionType.AUTHOR, null,
+		Flashcard card = new Flashcard("9999", QuestionType.AUTHOR, null,
 				"Who is the author of book The Novice?",
 				"Taran Matharu", 
 				"The Novice");
-		Mono<Flashcard> saved = cardRepo.save(qna);
+		Mono<Flashcard> saved = cardRepo.save(card);
 		System.out.println(saved.toString());
 	    
 	    StepVerifier.create(saved)
 	    .expectSubscription()
-	    .expectNextMatches( (savedQna) -> 
-	        savedQna.getId().equals(qna.getId()) && savedQna.getAnswer().equals(savedQna.getAnswer()) )
+	    .expectNextMatches( (savedCard) -> 
+	        savedCard.getId().equals(card.getId()) && savedCard.getAnswer().equals(savedCard.getAnswer()) )
 	    .verifyComplete();
 	    
     }
@@ -150,8 +150,8 @@ public class TestFlashcardRepository {
 
 		StepVerifier.create(deleted.log("[deleteCardById] ")).expectSubscription().verifyComplete();
 
-		Mono<Flashcard> qna = cardRepo.findById("011").log("[deleteCardById] verify: ");
-		StepVerifier.create(qna)
+		Mono<Flashcard> card = cardRepo.findById("011").log("[deleteCardById] verify: ");
+		StepVerifier.create(card)
 			.expectSubscription()
 			.expectNextCount(0)
 			.verifyComplete();

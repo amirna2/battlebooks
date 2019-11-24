@@ -2,6 +2,8 @@ package com.example.battlebooks.handler;
 
 import static reactor.core.publisher.Mono.error;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -10,7 +12,6 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.server.ResponseStatusException;
-
 import com.example.battlebooks.model.Book;
 import com.example.battlebooks.repository.BookRepository;
 
@@ -20,7 +21,9 @@ import reactor.core.publisher.Mono;
 public class BookHandler {
 
 	public static final String  API_BOOKS = "/api/books";
+    final Logger logger = LogManager.getLogger(BookHandler.class.getSimpleName());
 
+    
 	static final Mono<ServerResponse> notFound = ServerResponse.notFound().build();
 	static final Mono<ServerResponse> badRequest = ServerResponse.badRequest().build();
 	static final Mono<ServerResponse> notAllowed = ServerResponse.status(HttpStatus.METHOD_NOT_ALLOWED).build();
@@ -31,6 +34,8 @@ public class BookHandler {
 	BookRepository repository;
 	
     public Mono<ServerResponse> getAllBooks(ServerRequest request) {
+    	
+    	logger.info("getAllBooks: request {}",request.toString());
         return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(repository.findAll(), Book.class);
     }
 

@@ -70,26 +70,20 @@ public class BookHandler {
 			})
 			.flatMap((deletedCustomer) -> { return noContent;});
 	}
-        
+    
     public Mono<ServerResponse> updateBook(ServerRequest request) {
 	    String id = request.pathVariable("id");
 	    
 	    final String notFoundReason = "Book ID "+id+" does not exist";
 	    
-	    /*
-	     * find the book, return not found if book doesn't exist
-	     * or update (save) the requested book and return it if saved
-	     * otherwise, return a server error
-	     */
-	    return repository
-	    		.findById(id).log("Found Book: ")
-				.switchIfEmpty(error(new ResponseStatusException(HttpStatus.NOT_FOUND, notFoundReason)))
-				.or(request.bodyToMono(Book.class))
-	    		.flatMap(bootToUpdate -> repository.save(bootToUpdate))
-			    .flatMap(savedBook -> 
-			    			ServerResponse.ok()
-			    			.contentType(MediaType.APPLICATION_JSON)
-			    			.body(BodyInserters.fromValue(savedBook)))
-			    .switchIfEmpty(serverError);
-	}
+	    return repository.findById(id)
+	    		  .switchIfEmpty(error(new ResponseStatusException(HttpStatus.NOT_FOUND, notFoundReason)))
+	    		  .then(request.bodyToMono(Book.class))
+	    		  .flatMap( update -> repository.save(update))
+	    		  .flatMap(saved -> ServerResponse.ok()
+						.contentType(MediaType.APPLICATION_JSON)
+						.body(BodyInserters.fromValue(saved)))
+				  .switchIfEmpty(serverError);
+	    		  
+    }
 }

@@ -191,7 +191,7 @@ public class BookHandlerTest {
             .expectBody(Book.class)
             .returnResult()
             .getResponseBody();    
-        
+     logger.info("testUpdateBook: updated book {}",updated.toString());   
    	 assertTrue(updated.getAuthor().equals(book.getAuthor()) && updated.getDescription().equals(book.getDescription()));      
 
     }

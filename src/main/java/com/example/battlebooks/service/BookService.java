@@ -1,5 +1,6 @@
 package com.example.battlebooks.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.battlebooks.model.Book;
@@ -11,10 +12,11 @@ import reactor.core.publisher.Mono;
 @Service
 public class BookService {
 	
+	@Autowired
 	private BookRepository bookRepo;
 	
-	public BookService(BookRepository bookRepo) {
-		this.bookRepo = bookRepo;		
+	public BookService() {
+				
 	}
 
 	public Flux<Book> getAllBooks() {

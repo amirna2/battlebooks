@@ -11,12 +11,12 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.example.battlebooks.model.Flashcard;
 import com.example.battlebooks.model.QuestionCategory;
 import com.example.battlebooks.model.QuestionType;
+import com.example.battlebooks.testutils.FlashcardTestUtils;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -28,52 +28,36 @@ import reactor.test.StepVerifier;
 @TestInstance(Lifecycle.PER_CLASS)
 public class TestFlashcardRepository {
 
-	@Autowired
-	FlashcardRepository cardRepo;
+	@Autowired FlashcardRepository cardRepo;
 	
-	@Autowired
-	MongoTemplate template;
-	
-	List<Flashcard> cardList = Arrays.asList(
-		new Flashcard("0001", QuestionType.IN_WHICH_BOOK, null,
-				"In which book, a character name Fletcher is chased from his village for a crime he did not commit?",
-				"The Novice by Taran Matharu", "The Novice"),
-		new Flashcard("0002", QuestionType.CONTENT, QuestionCategory.CHARACTER,
-				"In Frogkisser!, what is the question Anya was asked the most frequently, later in her life?",
-				"How is it possible to have two stepparents and no actual parents?", 
-				"Frogkisser!"),
-		new Flashcard("0003", QuestionType.IN_WHICH_BOOK, null,
-				"In which book, a character named Morven is turned to a Frog after being kissed?",
-				"Frogkisser!",
-				"Frogkisser!"),
-		new Flashcard("0004", QuestionType.CONTENT, QuestionCategory.CHARACTER,
-				"In The Only Road, how old is Jaime when he makes his journey from Guatemala to the United States?",
-				"Twelve", 
-				"The Only Road"),
-		new Flashcard("0005", QuestionType.CONTENT, QuestionCategory.DATE,
-				"In Port Chicago 50, when did a massive explosion rock tthe segregated Navy base at Port Chicago, California, killing more than 300 sailors?",
-				"July 17, 1944", 
-				"Port Chicago 50"),
-		new Flashcard("0006", QuestionType.AUTHOR, null,
-				"Who is the author of the book The Only Road",
-				"Alexandra Diaz", 
-				"The Only Road")
-	);
-				
 	@AfterAll 
-    public void cleanup() {
+    public void testCleanup() {
 		cardRepo.deleteAll();
     }
     
     @BeforeAll
-    public void setupTest() {
-    	cardRepo.deleteAll()
-            .thenMany(Flux.fromIterable(cardList))
-            .flatMap(cardRepo::save)
-            .doOnNext((card -> {
-                System.out.println("[setupTest] Saved card: "+ card);
-            }))
-            .blockLast();  // blocking only for testing purposes
+    public void testSetup() {
+    	List<Flashcard> cardList = Arrays.asList(new Flashcard("0001", QuestionType.IN_WHICH_BOOK, null,
+    			"In which book, a character name Fletcher is chased from his village for a crime he did not commit?",
+    			"The Novice by Taran Matharu", "The Novice"),
+    			new Flashcard("0002", QuestionType.CONTENT, QuestionCategory.CHARACTER,
+    					"In Frogkisser!, what is the question Anya was asked the most frequently, later in her life?",
+    					"How is it possible to have two stepparents and no actual parents?", "Frogkisser!"),
+    			new Flashcard("0003", QuestionType.IN_WHICH_BOOK, null,
+    					"In which book, a character named Morven is turned to a Frog after being kissed?",
+    					"Frogkisser!", "Frogkisser!"),
+    			new Flashcard("0004", QuestionType.CONTENT, QuestionCategory.CHARACTER,
+    					"In The Only Road, how old is Jaime when he makes his journey from Guatemala to the United States?",
+    					"Twelve", "The Only Road"),
+    			new Flashcard("0005", QuestionType.CONTENT, QuestionCategory.DATE,
+    					"In Port Chicago 50, when did a massive explosion rock tthe segregated Navy base at Port Chicago, California, killing more than 300 sailors?",
+    					"July 17, 1944", "Port Chicago 50"),
+    			new Flashcard("0006", QuestionType.AUTHOR, null, "Who is the author of the book The Only Road",
+    					"Alexandra Diaz", "The Only Road"));
+    	
+    	cardRepo.deleteAll().thenMany(Flux.fromIterable(cardList)).flatMap(cardRepo::save).doOnNext((card -> {
+			System.out.println("[setupTest] Saved card: " + card);
+		})).blockLast(); // blocking only for testing purposes
     }
     
     @Test

@@ -1,5 +1,6 @@
 package com.example.battlebooks.repository;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,8 +35,9 @@ public class TestQuizzRepository {
 	MongoTemplate template;
 	
 	List<Quizz> quizzes = Arrays.asList(
-			new Quizz("001", "test quizz 1", "A test quizz", Arrays.asList("002","004","005"),0),
-			new Quizz("002", "test quizz 2", "A test quizz with only in which book questions", Arrays.asList("001","003"),30));
+			new Quizz("001", Arrays.asList("004", "012","014"), 0, "quizz 1", "A test quizz", Arrays.asList("0002","0004","0005")),
+			new Quizz("002", Arrays.asList("004","011"), 30, "quizz 2", "in which book questions only", Arrays.asList("0001","0003"))
+	);
 	
 				
 	@AfterAll 
@@ -111,7 +113,7 @@ public class TestQuizzRepository {
 	
 	@Test
     public void addNewQuizz() {
-	    Quizz quizz = new Quizz("999", "test quizz 3", "A test quizz", Arrays.asList("002","004","005","007"),60);
+	    Quizz quizz = new Quizz("999", Arrays.asList("004", "012","014"), 60,"test quizz 3", "A test quizz", Arrays.asList("0002","0004","0005","0006"));
 
 	    Mono<Quizz> saved = quizzRepo.save(quizz);
 	    

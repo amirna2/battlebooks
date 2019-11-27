@@ -21,7 +21,7 @@ public class Flashcard {
 	
 	public static final String KEY_BOOK = "bookTitle";
 	@TextIndexed private String bookTitle;
-	
+		
 	public Flashcard() {}
 	
 	public Flashcard(String id, String type, String category, String question, String answer, String bookTitle) {

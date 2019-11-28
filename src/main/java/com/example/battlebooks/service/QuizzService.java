@@ -1,5 +1,7 @@
 package com.example.battlebooks.service;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +34,15 @@ public class QuizzService {
 
 	public Mono<Quizz> saveQuizz(Quizz quizz) {
 		
+		//Draw unique numbers within a given range
+		//ThreadLocalRandom.current().ints(0, 100).distinct().limit(5).forEach(System.out::println);
+		
 		//TODO: Actually populate the Quizz flashcards list based in the book Ids, before saving it in the database
 		return quizzRepo.save(quizz);
 	} 
+	
+	public Mono<Boolean> quizzExists(String id) {
+		return quizzRepo.existsById(id);
+	}
+	
 }

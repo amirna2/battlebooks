@@ -24,7 +24,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import com.example.battlebooks.handler.HandlerUtils;
-import com.example.battlebooks.model.Book;
 import com.example.battlebooks.model.Quizz;
 import com.example.battlebooks.repository.QuizzRepository;
 

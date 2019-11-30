@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 
 import com.example.battlebooks.model.Flashcard;
-import com.example.battlebooks.model.QuestionCategory;
 import com.example.battlebooks.model.QuestionType;
 import com.example.battlebooks.repository.FlashcardRepository;
 

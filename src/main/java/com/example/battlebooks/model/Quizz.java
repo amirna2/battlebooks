@@ -91,7 +91,7 @@ public class Quizz {
 		this.bookIds = bookIds;
 		return this;
 	}
-	public List<String> getBookTitles() {
+	public List<String> getBookIds() {
 		return bookIds;
 	}
 	

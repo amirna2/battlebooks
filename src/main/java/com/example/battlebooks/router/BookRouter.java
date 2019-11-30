@@ -14,6 +14,7 @@ import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.example.battlebooks.handler.BookHandler;
+import com.example.battlebooks.handler.HandlerUtils;
 
 
 @Configuration
@@ -22,15 +23,15 @@ public class BookRouter {
     @Bean
     public RouterFunction<ServerResponse> bookApiRoute(BookHandler handler){
         RouterFunction<ServerResponse> rf = RouterFunctions
-                .route(GET(BookHandler.API_BOOKS).and(accept(MediaType.APPLICATION_JSON))
+                .route(GET(HandlerUtils.API_BOOKS).and(accept(MediaType.APPLICATION_JSON))
                 ,handler::getAllBooks)
-                .andRoute(GET(BookHandler.API_BOOKS + "/{id}").and(accept(MediaType.APPLICATION_JSON))
+                .andRoute(GET(HandlerUtils.API_BOOKS + "/{id}").and(accept(MediaType.APPLICATION_JSON))
                 ,handler::getBookById)
-                .andRoute(POST(BookHandler.API_BOOKS).and(accept(MediaType.APPLICATION_JSON))
+                .andRoute(POST(HandlerUtils.API_BOOKS).and(accept(MediaType.APPLICATION_JSON))
                 ,handler::createBook)
-                .andRoute(DELETE(BookHandler.API_BOOKS + "/{id}").and(accept(MediaType.APPLICATION_JSON))
+                .andRoute(DELETE(HandlerUtils.API_BOOKS + "/{id}").and(accept(MediaType.APPLICATION_JSON))
                 ,handler::deleteBook)
-                .andRoute(PUT(BookHandler.API_BOOKS + "/{id}").and(accept(MediaType.APPLICATION_JSON))
+                .andRoute(PUT(HandlerUtils.API_BOOKS + "/{id}").and(accept(MediaType.APPLICATION_JSON))
                 ,handler::updateBook);
         
         return rf;

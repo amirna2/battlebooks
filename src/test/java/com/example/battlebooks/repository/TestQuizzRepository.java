@@ -12,7 +12,6 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -30,9 +29,6 @@ public class TestQuizzRepository {
 
 	@Autowired
 	QuizzRepository quizzRepo;
-	
-	@Autowired
-	MongoTemplate template;
 	
 	List<Quizz> quizzes = Arrays.asList(
 			new Quizz("001", Arrays.asList("004", "012","014"), 0, "quizz 1", "A test quizz", Arrays.asList("0002","0004","0005")),
@@ -97,10 +93,10 @@ public class TestQuizzRepository {
 	@Test
 	public void deleteQuizzById() {
 		Mono<Void> deleted = quizzRepo.findById("002")
-				// map transforms the Flux book into a book OBJECT which can be manipulated
-				.map(Quizz::getId).flatMap(id -> {
-					return quizzRepo.deleteById(id);
-				});
+			// map transforms the Flux book into a book OBJECT which can be manipulated
+			.map(Quizz::getId).flatMap(id -> {
+				return quizzRepo.deleteById(id);
+			});
 
 		StepVerifier.create(deleted.log("[deleteQuizzById] ")).expectSubscription().verifyComplete();
 

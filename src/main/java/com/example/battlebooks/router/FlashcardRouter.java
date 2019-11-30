@@ -15,6 +15,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.example.battlebooks.handler.BookHandler;
 import com.example.battlebooks.handler.FlashcardHandler;
+import com.example.battlebooks.handler.HandlerUtils;
 
 
 @Configuration
@@ -23,15 +24,15 @@ public class FlashcardRouter {
     @Bean
     public RouterFunction<ServerResponse> cardApiRoute(FlashcardHandler handler){
         RouterFunction<ServerResponse> rf = RouterFunctions
-                .route(GET(FlashcardHandler.API_CARDS).and(accept(MediaType.APPLICATION_JSON))
+                .route(GET(HandlerUtils.API_CARDS).and(accept(MediaType.APPLICATION_JSON))
                 ,handler::getCardByQuery)
-                .andRoute(GET(FlashcardHandler.API_CARDS + "/{id}").and(accept(MediaType.APPLICATION_JSON))
+                .andRoute(GET(HandlerUtils.API_CARDS + "/{id}").and(accept(MediaType.APPLICATION_JSON))
                 ,handler::getCardById)
-                .andRoute(POST(FlashcardHandler.API_CARDS).and(accept(MediaType.APPLICATION_JSON))
+                .andRoute(POST(HandlerUtils.API_CARDS).and(accept(MediaType.APPLICATION_JSON))
                 ,handler::createCard)
-                .andRoute(DELETE(FlashcardHandler.API_CARDS + "/{id}").and(accept(MediaType.APPLICATION_JSON))
+                .andRoute(DELETE(HandlerUtils.API_CARDS + "/{id}").and(accept(MediaType.APPLICATION_JSON))
                 ,handler::deleteCard)
-                .andRoute(PUT(FlashcardHandler.API_CARDS + "/{id}").and(accept(MediaType.APPLICATION_JSON))
+                .andRoute(PUT(HandlerUtils.API_CARDS + "/{id}").and(accept(MediaType.APPLICATION_JSON))
                 ,handler::updateCard);
         
         return rf;

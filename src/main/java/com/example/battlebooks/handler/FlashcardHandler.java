@@ -2,14 +2,7 @@ package com.example.battlebooks.handler;
 
 import static reactor.core.publisher.Mono.error;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -27,14 +20,6 @@ import reactor.core.publisher.Mono;
 @Component
 public class FlashcardHandler {
 
-	public static final String  API_CARDS = "/api/cards";
-
-	static final Mono<ServerResponse> notFound = ServerResponse.notFound().build();
-	static final Mono<ServerResponse> badRequest = ServerResponse.badRequest().build();
-	static final Mono<ServerResponse> notAllowed = ServerResponse.status(HttpStatus.METHOD_NOT_ALLOWED).build();
-	static final Mono<ServerResponse> noContent = ServerResponse.noContent().build();
-	static final Mono<ServerResponse> serverError = ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-
 	@Autowired
 	FlashcardService cardService;
 	
@@ -47,7 +32,7 @@ public class FlashcardHandler {
         return found.flatMap(card -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(BodyInserters.fromValue(card)))
-                    .switchIfEmpty(notFound);
+                    .switchIfEmpty(HandlerUtils.notFound);
     }
     
     // e.g : /api/cards?type="content"?category="place"?bookTitle="In Frogkisser!"
@@ -55,7 +40,7 @@ public class FlashcardHandler {
     public Mono<ServerResponse> getCardByQuery(ServerRequest request) {   	   
     	   Flux<Flashcard> cards = cardService.getCardsByQuery(request.queryParams());
     	   if (cards == null) {
-    		   return badRequest;
+    		   return HandlerUtils.badRequest;
     	   }
            return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(cards, Flashcard.class);
     }
@@ -78,7 +63,7 @@ public class FlashcardHandler {
 			.flatMap(card -> {
 				return cardService.deleteCardById(id).then(Mono.just(card));
 			})
-			.flatMap(deletedCard -> noContent);
+			.flatMap(deletedCard -> HandlerUtils.noContent);
 	}
         
     public Mono<ServerResponse> updateCard(ServerRequest request) {
@@ -93,6 +78,6 @@ public class FlashcardHandler {
 	    		  .flatMap(saved -> ServerResponse.ok()
 						.contentType(MediaType.APPLICATION_JSON)
 						.body(BodyInserters.fromValue(saved)))
-				  .switchIfEmpty(serverError);
+				  .switchIfEmpty(HandlerUtils.serverError);
     }
 }

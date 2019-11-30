@@ -21,7 +21,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import com.example.battlebooks.handler.FlashcardHandler;
+import com.example.battlebooks.handler.HandlerUtils;
 import com.example.battlebooks.model.Flashcard;
 import com.example.battlebooks.model.QuestionCategory;
 import com.example.battlebooks.model.QuestionType;
@@ -36,9 +36,9 @@ import reactor.core.publisher.Mono;
 @DirtiesContext
 @ActiveProfiles("dev")
 @TestInstance(Lifecycle.PER_CLASS)
-public class FlashcardHandlerTest {
+public class TestFlashcardHandler {
 	
-    final Logger logger = LogManager.getLogger(BookHandlerTest.class.getSimpleName());
+    final Logger logger = LogManager.getLogger(TestBookHandler.class.getSimpleName());
 
 	@Autowired
     WebTestClient webTestClient;
@@ -88,9 +88,9 @@ public class FlashcardHandlerTest {
             .thenMany(Flux.fromIterable(cardList))
             .flatMap(cardRepo::save)
             .doOnNext((card -> {
-                System.out.println("[setupTest] Saved card: "+ card);
+                logger.info("[setupTest] Saved card: "+ card);
             }))
-            .blockLast();  // blocking only for testing purposes
+            .blockLast();  // blocking ensures setup completes before we start any unit tests
     }
     
     private boolean equalStrings(String s1, String s2) {
@@ -101,7 +101,7 @@ public class FlashcardHandlerTest {
     public void testGetByQuery_where_query_is_ByType() {
         webTestClient.get()
         .uri(uriBuilder -> uriBuilder
-        		.path(FlashcardHandler.API_CARDS)
+        		.path(HandlerUtils.API_CARDS)
         		.queryParam(Flashcard.KEY_TYPE, QuestionType.AUTHOR)
         		.build())
         .exchange()
@@ -117,7 +117,7 @@ public class FlashcardHandlerTest {
     	String types = QuestionType.AUTHOR + "," + QuestionType.CONTENT;
         webTestClient.get()
         .uri(uriBuilder -> uriBuilder
-        		.path(FlashcardHandler.API_CARDS)
+        		.path(HandlerUtils.API_CARDS)
         		.queryParam(Flashcard.KEY_TYPE, types)
         		.build())
         .exchange()
@@ -135,7 +135,7 @@ public class FlashcardHandlerTest {
     	
         webTestClient.get()
         .uri(uriBuilder -> uriBuilder
-        		.path(FlashcardHandler.API_CARDS)
+        		.path(HandlerUtils.API_CARDS)
         		.queryParam(Flashcard.KEY_TYPE, types)
         		.queryParam(Flashcard.KEY_CATEGORY, categories)
 
@@ -151,7 +151,7 @@ public class FlashcardHandlerTest {
     public void testGetByQuery_where_query_is_ByCategoryAndType() {
         webTestClient.get()
         .uri(uriBuilder -> uriBuilder
-        		.path(FlashcardHandler.API_CARDS)
+        		.path(HandlerUtils.API_CARDS)
         		.queryParam(Flashcard.KEY_TYPE, QuestionType.CONTENT)
         		.queryParam(Flashcard.KEY_CATEGORY, QuestionCategory.CHARACTER)
         		.build())
@@ -166,7 +166,7 @@ public class FlashcardHandlerTest {
     public void testGetByQuery_where_query_is_ByBookTitle() {
         webTestClient.get()
         .uri(uriBuilder -> uriBuilder
-        		.path(FlashcardHandler.API_CARDS)
+        		.path(HandlerUtils.API_CARDS)
         		.queryParam(Flashcard.KEY_BOOK, "Frogkisser!")
         		.build())
         .exchange()
@@ -180,7 +180,7 @@ public class FlashcardHandlerTest {
     public void testGetByQuery_where_query_is_ByBookTitleAndCategory() {
         webTestClient.get()
         .uri(uriBuilder -> uriBuilder
-        		.path(FlashcardHandler.API_CARDS)
+        		.path(HandlerUtils.API_CARDS)
         		.queryParam(Flashcard.KEY_BOOK, "Frogkisser!")
         		.queryParam(Flashcard.KEY_CATEGORY, QuestionCategory.CHARACTER)
         		.build())
@@ -201,7 +201,7 @@ public class FlashcardHandlerTest {
 
         webTestClient.get()
         .uri(uriBuilder -> uriBuilder
-        		.path(FlashcardHandler.API_CARDS)
+        		.path(HandlerUtils.API_CARDS)
         		.queryParam(Flashcard.KEY_BOOK, "Frogkisser!")
         		.queryParam(Flashcard.KEY_CATEGORY, QuestionCategory.OBJECT+","+QuestionCategory.CHARACTER)
         		.build())
@@ -222,7 +222,7 @@ public class FlashcardHandlerTest {
     public void testGetByQuery_where_query_is_ByInvalidCategoryAndType() {
         webTestClient.get()
         .uri(uriBuilder -> uriBuilder
-        		.path(FlashcardHandler.API_CARDS)
+        		.path(HandlerUtils.API_CARDS)
         		.queryParam(Flashcard.KEY_TYPE, QuestionType.IN_WHICH_BOOK)
         		.queryParam(Flashcard.KEY_CATEGORY, QuestionCategory.CHARACTER)
         		.build())
@@ -234,7 +234,7 @@ public class FlashcardHandlerTest {
     public void testGetByQuery_where_query_is_ReturningEmptyResults() {
         webTestClient.get()
         .uri(uriBuilder -> uriBuilder
-        		.path(FlashcardHandler.API_CARDS)
+        		.path(HandlerUtils.API_CARDS)
         		.queryParam(Flashcard.KEY_TYPE, QuestionType.CONTENT)
         		.queryParam(Flashcard.KEY_CATEGORY, QuestionCategory.EVENT)
         		.build())
@@ -249,7 +249,7 @@ public class FlashcardHandlerTest {
     public void testGetByQuery_withAllQueryParams() {
     	webTestClient.get()
         .uri(uriBuilder -> uriBuilder
-        		.path(FlashcardHandler.API_CARDS)
+        		.path(HandlerUtils.API_CARDS)
         		.queryParam(Flashcard.KEY_TYPE, QuestionType.CONTENT)
         		.queryParam(Flashcard.KEY_CATEGORY, QuestionCategory.DATE)
         		.queryParam(Flashcard.KEY_BOOK, "Port Chicago 50")
@@ -269,7 +269,7 @@ public class FlashcardHandlerTest {
 				"Frogkisser!");
     	
     	Flashcard updated = webTestClient.put()
-                .uri(FlashcardHandler.API_CARDS.concat("/{id}"), card.getId())
+                .uri(HandlerUtils.API_CARDS.concat("/{id}"), card.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .body(Mono.just(card), Flashcard.class)
@@ -290,7 +290,7 @@ public class FlashcardHandlerTest {
 				"Frogkisser!");
     	
     	webTestClient.put()
-                .uri(FlashcardHandler.API_CARDS.concat("/{id}"), card.getId())
+                .uri(HandlerUtils.API_CARDS.concat("/{id}"), card.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .body(Mono.just(card), Flashcard.class)
@@ -310,7 +310,7 @@ public class FlashcardHandlerTest {
  	    		
     	 
     	 Flashcard created = webTestClient.post()
-            .uri(FlashcardHandler.API_CARDS)
+            .uri(HandlerUtils.API_CARDS)
             .contentType(MediaType.APPLICATION_JSON)
             .body(Mono.just(card), Flashcard.class)
             .exchange()
@@ -334,7 +334,7 @@ public class FlashcardHandlerTest {
  	    		
     	 
     	 webTestClient.post()
-            .uri(FlashcardHandler.API_CARDS)
+            .uri(HandlerUtils.API_CARDS)
             .contentType(MediaType.APPLICATION_JSON)
             .body(Mono.just(card), Flashcard.class)
             .exchange()

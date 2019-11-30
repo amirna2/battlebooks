@@ -21,15 +21,8 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class QuizzHandler {
-	public static final String  API_CARDS = "/api/quizz";
 
     final Logger logger = LogManager.getLogger(QuizzHandler.class.getSimpleName());
-
-	static final Mono<ServerResponse> notFound = ServerResponse.notFound().build();
-	static final Mono<ServerResponse> badRequest = ServerResponse.badRequest().build();
-	static final Mono<ServerResponse> notAllowed = ServerResponse.status(HttpStatus.METHOD_NOT_ALLOWED).build();
-	static final Mono<ServerResponse> noContent = ServerResponse.noContent().build();
-	static final Mono<ServerResponse> serverError = ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 
 	@Autowired
 	QuizzService quizzService;
@@ -46,21 +39,25 @@ public class QuizzHandler {
     public Mono<ServerResponse> getQuizzById(ServerRequest request) {
         String id = request.pathVariable("id");
         
+    	logger.info("getQuizzById: request {} - id:{}",request.toString(), id);
+
         Mono<Quizz> foundQuizz = quizzService.getQuizzById(id);
         
-        return foundQuizz.flatMap(book -> ServerResponse.ok()
+        return foundQuizz.flatMap(quizz -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
-                        .body(BodyInserters.fromValue(book)))
-                    .switchIfEmpty(notFound);
+                        .body(BodyInserters.fromValue(quizz)))
+                    .switchIfEmpty(HandlerUtils.notFound);
     }
         
-    public Mono<ServerResponse> createBook(ServerRequest request) {
+    public Mono<ServerResponse> createQuizz(ServerRequest request) {
         Mono<Quizz> quizzToCreate = request.bodyToMono(Quizz.class);
-        
-        return quizzToCreate.flatMap(book -> 
+
+        logger.info("createQuizz:\nREQUEST {}\n{}",request.toString(), quizzToCreate.toProcessor().peek());
+
+        return quizzToCreate.flatMap(quizz -> 
             ServerResponse.created(null)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(quizzService.saveQuizz(book),Quizz.class));
+                .body(quizzService.saveQuizz(quizz),Quizz.class));
     }
    
     public Mono<ServerResponse> deleteQuizz(ServerRequest request) {
@@ -71,7 +68,7 @@ public class QuizzHandler {
 			.flatMap(quizz -> {
 				return quizzService.deleteQuizzById(id).then(Mono.just(quizz));
 			})
-			.flatMap(deletedQuizz -> noContent);
+			.flatMap(deletedQuizz -> HandlerUtils.noContent);
 	}
     
     public Mono<ServerResponse> deleteQuizz2(ServerRequest request) {
@@ -86,7 +83,7 @@ public class QuizzHandler {
 					    .doOnError(t -> logger.warn("QuizzHandler: Failed to delete Quizz {} - {}", id, t.getMessage() ))
 						.onErrorMap(e -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,serverErrorReason));
 			})
-			.flatMap(deletedQuizz -> noContent);
+			.flatMap(deletedQuizz -> HandlerUtils.noContent);
 	}
     
     public Mono<ServerResponse> updateQuizz(ServerRequest request) {
@@ -105,7 +102,7 @@ public class QuizzHandler {
 		    			.flatMap(saved -> ServerResponse.ok()
 							.contentType(MediaType.APPLICATION_JSON)
 							.body(BodyInserters.fromValue(saved)))
-		    			.switchIfEmpty(serverError);
+		    			.switchIfEmpty(HandlerUtils.serverError);
 	    	});
     } 	
 }

@@ -24,7 +24,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-import com.example.battlebooks.handler.BookHandler;
+import com.example.battlebooks.handler.HandlerUtils;
 import com.example.battlebooks.model.Book;
 import com.example.battlebooks.repository.BookRepository;
 
@@ -38,9 +38,9 @@ import reactor.test.StepVerifier;
 @DirtiesContext
 @ActiveProfiles("dev")
 @TestInstance(Lifecycle.PER_CLASS)
-public class BookHandlerTest {
+public class TestBookHandler {
 	
-    final Logger logger = LogManager.getLogger(BookHandlerTest.class.getSimpleName());
+    final Logger logger = LogManager.getLogger(TestBookHandler.class.getSimpleName());
 
 	@Autowired
     WebTestClient webTestClient;
@@ -86,7 +86,7 @@ public class BookHandlerTest {
     @Test
     public void testGetAllBooks() {
         webTestClient.get()
-            .uri(BookHandler.API_BOOKS)
+            .uri(HandlerUtils.API_BOOKS)
             .exchange()
             .expectStatus().isOk()
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -97,7 +97,7 @@ public class BookHandlerTest {
     @Test
     public void testGetAllBooks_withVerifier() {
         Flux<Book> bookFlux = webTestClient.get()
-            .uri(BookHandler.API_BOOKS)
+            .uri(HandlerUtils.API_BOOKS)
             .exchange()
             .expectStatus().isOk()
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -113,7 +113,7 @@ public class BookHandlerTest {
     @Test
     public void test_GetBookById_when_IdExists() {
        Book book = webTestClient.get()
-            .uri(BookHandler.API_BOOKS.concat("/{id}"), "004")
+            .uri(HandlerUtils.API_BOOKS.concat("/{id}"), "004")
             .exchange()
             .expectStatus().isOk()
             .expectBody(Book.class)
@@ -126,7 +126,7 @@ public class BookHandlerTest {
     @Test
     public void test_GetBookById_when_IdDoesNotExist() {
        Book book = webTestClient.get()
-            .uri(BookHandler.API_BOOKS.concat("/{id}"), "100")
+            .uri(HandlerUtils.API_BOOKS.concat("/{id}"), "100")
             .exchange()
             .expectStatus().is4xxClientError()
             .expectBody(Book.class)
@@ -147,7 +147,7 @@ public class BookHandlerTest {
  	    		.setDescription("Blah...blah...");
     	 
     	 Book created = webTestClient.post()
-            .uri(BookHandler.API_BOOKS)
+            .uri(HandlerUtils.API_BOOKS)
             .contentType(MediaType.APPLICATION_JSON)
             .body(Mono.just(book), Book.class)
             .exchange()
@@ -162,16 +162,16 @@ public class BookHandlerTest {
     @Test
     public void testDeleteBook() {
         webTestClient.delete()
-        .uri(BookHandler.API_BOOKS.concat("/{id}"), "004")
+        .uri(HandlerUtils.API_BOOKS.concat("/{id}"), "004")
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus().isNoContent();
     }
     
     @Test
-    public void deleteItem_NotAllowed() {
+    public void deleteBook_NotAllowed() {
         webTestClient.delete()
-        .uri(BookHandler.API_BOOKS.concat("/{id}"), "300")
+        .uri(HandlerUtils.API_BOOKS.concat("/{id}"), "300")
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus().isEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
@@ -182,7 +182,7 @@ public class BookHandlerTest {
       
     	Book book = new Book("016","The Teacher’s Funeral" ,"Richard Peck", "some description...", null);
         Book updated = webTestClient.put()
-            .uri(BookHandler.API_BOOKS.concat("/{id}"), book.getId())
+            .uri(HandlerUtils.API_BOOKS.concat("/{id}"), book.getId())
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
             .body(Mono.just(book), Book.class)
@@ -201,7 +201,7 @@ public class BookHandlerTest {
       
     	Book book = new Book("100","The Teacher’s Funeral" ,"Richard Peck", "some description...", null);
         webTestClient.put()
-            .uri(BookHandler.API_BOOKS.concat("/{id}"), book.getId())
+            .uri(HandlerUtils.API_BOOKS.concat("/{id}"), book.getId())
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
             .body(Mono.just(book), Book.class)

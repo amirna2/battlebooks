@@ -13,7 +13,6 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.server.ResponseStatusException;
 import com.example.battlebooks.model.Book;
-import com.example.battlebooks.repository.BookRepository;
 import com.example.battlebooks.service.BookService;
 
 import reactor.core.publisher.Flux;
@@ -22,16 +21,9 @@ import reactor.core.publisher.Mono;
 @Component
 public class BookHandler {
 
-	public static final String  API_BOOKS = "/api/books";
     final Logger logger = LogManager.getLogger(BookHandler.class.getSimpleName());
-    
-	static final Mono<ServerResponse> notFound = ServerResponse.notFound().build();
-	static final Mono<ServerResponse> badRequest = ServerResponse.badRequest().build();
-	static final Mono<ServerResponse> notAllowed = ServerResponse.status(HttpStatus.METHOD_NOT_ALLOWED).build();
-	static final Mono<ServerResponse> noContent = ServerResponse.noContent().build();
-	static final Mono<ServerResponse> serverError = ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-
-	@Autowired
+ 
+    @Autowired
 	BookService bookService;
 	
     public Mono<ServerResponse> getAllBooks(ServerRequest request) {
@@ -51,7 +43,7 @@ public class BookHandler {
         return foundBook.flatMap(book -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(BodyInserters.fromValue(book)))
-                    .switchIfEmpty(notFound);
+                    .switchIfEmpty(HandlerUtils.notFound);
     }
         
     public Mono<ServerResponse> createBook(ServerRequest request) {
@@ -71,7 +63,7 @@ public class BookHandler {
 			.flatMap(book -> {
 				return bookService.deleteBookById(id).then(Mono.just(book));
 			})
-			.flatMap(deletedBook -> noContent);
+			.flatMap(deletedBook -> HandlerUtils.noContent);
 	}
     
     public Mono<ServerResponse> updateBook(ServerRequest request) {
@@ -101,7 +93,7 @@ public class BookHandler {
 		    			.flatMap(saved -> ServerResponse.ok()
 							.contentType(MediaType.APPLICATION_JSON)
 							.body(BodyInserters.fromValue(saved)))
-		    			.switchIfEmpty(serverError);
+		    			.switchIfEmpty(HandlerUtils.serverError);
 		    	
 	    	});
     } 	

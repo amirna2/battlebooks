@@ -28,5 +28,5 @@ public class UserRouter {
         	    .andRoute(PUT(HandlerUtils.API_USERS + "/{id}").and(accept(MediaType.APPLICATION_JSON)), handler::updateUser)
         	    .andRoute(DELETE(HandlerUtils.API_USERS + "/{id}").and(accept(MediaType.APPLICATION_JSON)), handler::deleteUser);
         return rf;
-    } 
+    }    
 }

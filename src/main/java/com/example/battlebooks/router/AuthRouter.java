@@ -18,7 +18,7 @@ import com.example.battlebooks.handler.HandlerUtils;
 public class AuthRouter {
     
 	@Bean
-    public RouterFunction<ServerResponse> userApiRoute(AuthHandler handler){
+    public RouterFunction<ServerResponse> authApiRoute(AuthHandler handler){
         RouterFunction<ServerResponse> rf = RouterFunctions
         		.route(POST(HandlerUtils.API_AUTH + "/login").and(accept(MediaType.APPLICATION_JSON)), handler::login)
         	    .andRoute(GET(HandlerUtils.API_AUTH + "/signup").and(accept(MediaType.APPLICATION_JSON)), handler::signUp)

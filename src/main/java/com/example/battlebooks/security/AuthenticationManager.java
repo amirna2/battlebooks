@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class AuthenticationManager implements ReactiveAuthenticationManager {
 
 	@Autowired
-	private TokenProvider jwtUtil;
+	private TokenProvider tokenProvider;
 	
 	@Override
 	public Mono<Authentication> authenticate(Authentication authentication) {
@@ -24,18 +24,17 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
 		
 		String username;
 		try {
-			username = jwtUtil.getUsernameFromToken(authToken);
+			username = tokenProvider.getUsernameFromToken(authToken);
 		} catch (Exception e) {
 			username = null;
 		}
-		if (username != null && jwtUtil.isTokenExpired(authToken)) {
-			Claims claims = jwtUtil.getAllClaimsFromToken(authToken);
+		if (username != null && tokenProvider.isTokenExpired(authToken)) {
+			Claims claims = tokenProvider.getAllClaimsFromToken(authToken);
 			@SuppressWarnings("unchecked")
 			List<String> rolesMap = claims.get("role", List.class);
 			List<Role> roles = new ArrayList<>();
-			for (String rolemap : rolesMap) {
-				roles.add(Role.valueOf(rolemap));
-			}
+			rolesMap.forEach(role -> roles.add(Role.valueOf(role)));
+
 			UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
 				username,
 				null,

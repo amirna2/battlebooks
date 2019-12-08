@@ -30,6 +30,10 @@ public class UserService {
 		return userRepo.findById(id);
 	}
 	
+	public Mono<User> getUserByUsername(String username) {
+		return userRepo.findByUserName(username);
+	}
+	
 	public Mono<Void> deleteUserById(String id) {
 		return userRepo.deleteById(id);
 	}

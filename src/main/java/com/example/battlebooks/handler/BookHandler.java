@@ -73,17 +73,6 @@ public class BookHandler {
 	    
 	    Mono<Boolean> exists = bookService.bookExists(id);
 
-	    /*	    
-	    return bookService.getBookById(id)
-	    		  .switchIfEmpty(error(new ResponseStatusException(HttpStatus.NOT_FOUND, notFoundReason)))
-	    		  .then(request.bodyToMono(Book.class))
-	    		  .flatMap( update -> bookService.saveBook(update))
-	    		  .flatMap(saved -> ServerResponse.ok()
-						.contentType(MediaType.APPLICATION_JSON)
-						.body(BodyInserters.fromValue(saved)))
-				  .switchIfEmpty(serverError);
-	     */
-
 	    return exists.
 	    		flatMap(bookExists -> {
 	    			if( !bookExists) {

@@ -1,9 +1,8 @@
 package com.example.battlebooks.handler;
 
-import static reactor.core.publisher.Mono.error;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -11,14 +10,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
-import org.springframework.web.server.ResponseStatusException;
 
-import com.example.battlebooks.model.Book;
-import com.example.battlebooks.model.Flashcard;
 import com.example.battlebooks.model.user.LoginRequest;
 import com.example.battlebooks.model.user.LoginResponse;
 import com.example.battlebooks.model.user.User;
-import com.example.battlebooks.repository.UserRepository;
 import com.example.battlebooks.security.TokenProvider;
 import com.example.battlebooks.service.UserService;
 
@@ -27,29 +22,50 @@ import reactor.core.publisher.Mono;
 @Component
 public class AuthHandler {
 	
+    final Logger logger = LogManager.getLogger(AuthHandler.class.getSimpleName());
+
+    
 	@Autowired
 	UserService userService;
-	private BCryptPasswordEncoder passwordEncoder;
-
+	
 	@Autowired
 	TokenProvider tokenProvider;
+	
+	private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-	public Mono<ServerResponse> login(ServerRequest request) {
+	// /api/auth/signin
+	public Mono<ServerResponse> signIn(ServerRequest request) {
 
-		Mono<LoginRequest> loginRequest = request.bodyToMono(LoginRequest.class);
-		return loginRequest.flatMap(login -> userService.getUserByUsername(login.getUsername()).flatMap(user -> {
-			if (passwordEncoder.matches(login.getPassword(), user.getPassword())) {
-				UsernamePasswordAuthenticationToken fromUsernamePassword = new UsernamePasswordAuthenticationToken(
-						login.getUsername(), login.getPassword());
-				LoginResponse response = new LoginResponse(200, "success", user.getUserName(),
-						tokenProvider.generateToken(fromUsernamePassword));
-				return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(response, LoginResponse.class);
-			} else {
-				return HandlerUtils.errorAccessDenied("Password incorrect");
-			}
-		}).switchIfEmpty(HandlerUtils.errorNotFound("Username not found")));
+		logger.info("REQUEST:/api/auth/signIn  {}",request.toString());
+
+		Mono<LoginRequest> loginRequest = request.bodyToMono(LoginRequest.class).log();
+		
+		return loginRequest
+				.flatMap(login -> userService.getUserByUsername(login.getUsername())
+							.flatMap(user -> {
+								logger.info("signIn: checking passwords");
+								if (passwordEncoder.matches(login.getPassword(), user.getPassword())) {
+									logger.info("signIn: Password match!!!");
+
+									UsernamePasswordAuthenticationToken fromUsernamePassword = 
+											new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword());
+									String token = tokenProvider.generateToken(fromUsernamePassword);
+									
+									LoginResponse response = new LoginResponse(200, "success", user.getUserName(),token);
+									logger.info("signIn: sending response : {}",response.toString());
+									
+									return ServerResponse.ok()
+											.contentType(MediaType.APPLICATION_JSON)
+											.body(BodyInserters.fromValue(response));
+									
+								} else {
+									logger.error("signIn: Password incorrect!!!");
+									return HandlerUtils.errorAccessDenied("Password incorrect");
+								}
+				}).switchIfEmpty(HandlerUtils.errorNotFound("User not found")));
 	}    
 	
+	// /api/auth/signup
 	public Mono<ServerResponse> signUp(ServerRequest request) {
 		Mono<User> userMono = request.bodyToMono(User.class);
 

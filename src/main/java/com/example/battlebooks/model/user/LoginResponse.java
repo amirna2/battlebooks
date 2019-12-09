@@ -51,4 +51,11 @@ public class LoginResponse {
         this.token = token;
         return this;
     }
+
+	@Override
+	public String toString() {
+		return "LoginResponse [status=" + status + ", message=" + message + ", username=" + username + ", token="
+				+ token + "]";
+	}
+    
 }

@@ -11,7 +11,6 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -29,10 +28,7 @@ public class TestBookRepository {
 
 	@Autowired
 	BookRepository bookRepo;
-	
-	@Autowired
-	MongoTemplate template;
-	
+		
 	List<Book> books = Arrays.asList(
 			new Book("001","The Blackthorn Key" ,"Kevin Sands", "Following a series of murders, an apothecary’s apprentice must solve puzzles and decipher codes in pursuit of a secret that could destroy the world in this “spectacular debut“", null),
 			new Book("002","Falling Over Sideways" ,"Jordan Sonnenblick", "A new hilarious, honest, and hopeful novel from the AUTHOR of Drums, Girls, and Dangerous Pie. It's not easy being Claire...Really.", null),

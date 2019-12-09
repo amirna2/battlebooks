@@ -22,8 +22,7 @@ public class UserRouter {
     @Bean
     public RouterFunction<ServerResponse> userApiRoute(UserHandler handler){
         RouterFunction<ServerResponse> rf = RouterFunctions
-        		.route(POST(HandlerUtils.API_USERS).and(accept(MediaType.APPLICATION_JSON)), handler::createUser)
-        	    .andRoute(GET(HandlerUtils.API_USERS).and(accept(MediaType.APPLICATION_JSON)), handler::getAllUsers)
+        		.route(GET(HandlerUtils.API_USERS).and(accept(MediaType.APPLICATION_JSON)), handler::getAllUsers)
         	    .andRoute(GET(HandlerUtils.API_USERS + "/{id}").and(accept(MediaType.APPLICATION_JSON)), handler::getUserById)
         	    .andRoute(PUT(HandlerUtils.API_USERS + "/{id}").and(accept(MediaType.APPLICATION_JSON)), handler::updateUser)
         	    .andRoute(DELETE(HandlerUtils.API_USERS + "/{id}").and(accept(MediaType.APPLICATION_JSON)), handler::deleteUser);

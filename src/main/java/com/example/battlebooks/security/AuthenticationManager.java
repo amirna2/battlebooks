@@ -1,12 +1,16 @@
 package com.example.battlebooks.security;
 
 import io.jsonwebtoken.Claims;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
+
 import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +22,12 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
 	@Autowired
 	private TokenProvider tokenProvider;
 	
+    final Logger logger = LogManager.getLogger(AuthenticationManager.class.getSimpleName());
+
+    public AuthenticationManager() {
+    	logger.info("AuthenticationManager created");
+    }
+    
 	@Override
 	public Mono<Authentication> authenticate(Authentication authentication) {
 		String authToken = authentication.getCredentials().toString();

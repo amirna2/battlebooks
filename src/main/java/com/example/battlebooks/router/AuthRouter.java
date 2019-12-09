@@ -20,9 +20,9 @@ public class AuthRouter {
 	@Bean
     public RouterFunction<ServerResponse> authApiRoute(AuthHandler handler){
         RouterFunction<ServerResponse> rf = RouterFunctions
-        		.route(POST(HandlerUtils.API_AUTH + "/login").and(accept(MediaType.APPLICATION_JSON)), handler::login)
+        		.route(POST(HandlerUtils.API_AUTH + "/signin").and(accept(MediaType.APPLICATION_JSON)), handler::signIn)
         	    .andRoute(GET(HandlerUtils.API_AUTH + "/signup").and(accept(MediaType.APPLICATION_JSON)), handler::signUp)
-        	    .andRoute(GET(HandlerUtils.API_AUTH + "/logout").and(accept(MediaType.APPLICATION_JSON)), handler::signOut);
+        	    .andRoute(GET(HandlerUtils.API_AUTH + "/signout").and(accept(MediaType.APPLICATION_JSON)), handler::signOut);
         return rf;
     } 
 }

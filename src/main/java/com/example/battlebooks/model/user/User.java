@@ -10,23 +10,23 @@ public class User {
 
 	public static final String KEY_USER_ID = "id";
 	@Id private String id;
-	@Indexed private String userName;
+	@Indexed private String username;
 	
     private String password;
     private String role;
-    private String fullName;
-    public static final String KEY_TEAM_NAME = "teamName";
-    @TextIndexed private String teamName;
+    private String fullname;
+    public static final String KEY_TEAM = "team";
+    @TextIndexed private String team;
     
 	public User() {}
 	
-	public User(String id, String userName, String password, String role, String fullName, String teamName) {
+	public User(String id, String username, String password, String role, String fullname, String team) {
 		this.id = id;
-		this.userName = userName;
+		this.username = username;
 		this.password = password;
 		this.role = role;
-		this.fullName = fullName;
-		this.teamName = teamName;
+		this.fullname = fullname;
+		this.team = team;
 	}
 
 	public String getId() {
@@ -38,12 +38,12 @@ public class User {
 		return this;
 	}
 
-	public String getUserName() {
-		return userName;
+	public String getUsername() {
+		return username;
 	}
 
-	public User setUserName(String userName) {
-		this.userName = userName;
+	public User setUsername(String username) {
+		this.username = username;
 		return this;
 	}
 
@@ -65,27 +65,27 @@ public class User {
 		return this;
 	}
 
-	public String getFullName() {
-		return fullName;
+	public String getFullname() {
+		return fullname;
 	}
 
-	public User setFullName(String fullName) {
-		this.fullName = fullName;
+	public User setFullname(String fullname) {
+		this.fullname = fullname;
 		return this;
 	}
 
-	public String getTeamName() {
-		return teamName;
+	public String getTeam() {
+		return team;
 	}
 
-	public User setTeamName(String teamName) {
-		this.teamName = teamName;
+	public User setTeam(String team) {
+		this.team = team;
 		return this;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("User [id=%s, userName=%s, password=%s, role=%s, fullName=%s, teamName=%s]", id, userName,
-				password, role, fullName, teamName);
+		return String.format("User [id=%s, username=%s, password=%s, role=%s, fullname=%s, team=%s]", id, username,
+				password, role, fullname, team);
 	}	
 }

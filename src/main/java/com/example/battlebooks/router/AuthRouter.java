@@ -21,7 +21,7 @@ public class AuthRouter {
     public RouterFunction<ServerResponse> authApiRoute(AuthHandler handler){
         RouterFunction<ServerResponse> rf = RouterFunctions
         		.route(POST(HandlerUtils.API_AUTH + "/signin").and(accept(MediaType.APPLICATION_JSON)), handler::signIn)
-        	    .andRoute(GET(HandlerUtils.API_AUTH + "/signup").and(accept(MediaType.APPLICATION_JSON)), handler::signUp)
+        	    .andRoute(POST(HandlerUtils.API_AUTH + "/signup").and(accept(MediaType.APPLICATION_JSON)), handler::signUp)
         	    .andRoute(GET(HandlerUtils.API_AUTH + "/signout").and(accept(MediaType.APPLICATION_JSON)), handler::signOut);
         return rf;
     } 

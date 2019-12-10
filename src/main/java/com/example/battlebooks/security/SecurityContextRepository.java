@@ -24,7 +24,6 @@ public class SecurityContextRepository implements ServerSecurityContextRepositor
     final Logger logger = LogManager.getLogger(SecurityContextRepository.class.getSimpleName());
 
     public SecurityContextRepository() {
-    	logger.info("SecurityContextRepository created");
     }
 	@Override
 	public Mono<Void> save(ServerWebExchange swe, SecurityContext sc) {
@@ -39,15 +38,12 @@ public class SecurityContextRepository implements ServerSecurityContextRepositor
         String authToken = null;
 		if (authHeader != null && authHeader.startsWith(TOKEN_PREFIX)) {
 			authToken = authHeader.replace(TOKEN_PREFIX, "");
-		} else {
-			logger.warn("load() couldn't find bearer string, will ignore the header.");
 		}
+		
 		if (authToken != null) {
-			logger.info("load() return new SecurityContextImpl");
 			Authentication auth = new UsernamePasswordAuthenticationToken(authToken, authToken);
 			return this.authenticationManager.authenticate(auth).map((authentication) -> new SecurityContextImpl(authentication));
 		} else {
-			logger.info("load() return empty mono");
 			return Mono.empty();
 		}
 	}

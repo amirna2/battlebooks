@@ -36,11 +36,11 @@ public class AuthHandler {
 	// /api/auth/signin
 	public Mono<ServerResponse> signIn(ServerRequest request) {
 
-		logger.info("REQUEST:/api/auth/signIn  {}",request.toString());
+		logger.info("REQUEST:/api/auth/signin received");
 
-		Mono<LoginRequest> loginRequest = request.bodyToMono(LoginRequest.class).log();
+		Mono<LoginRequest> signinRequest = request.bodyToMono(LoginRequest.class).log();
 		
-		return loginRequest
+		return signinRequest
 				.flatMap(login -> userService.getUserByUsername(login.getUsername())
 							.flatMap(user -> {
 								logger.info("signIn: checking passwords");
@@ -48,16 +48,15 @@ public class AuthHandler {
 									logger.info("signIn: Password match!!!");
 
 									UsernamePasswordAuthenticationToken fromUsernamePassword = 
-											new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword());
+											new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
 									String token = tokenProvider.generateToken(fromUsernamePassword);
 									
-									LoginResponse response = new LoginResponse(200, "success", user.getUserName(),token);
+									LoginResponse response = new LoginResponse(200, "success", user.getUsername(),token);
 									logger.info("signIn: sending response : {}",response.toString());
 									
 									return ServerResponse.ok()
 											.contentType(MediaType.APPLICATION_JSON)
-											.body(BodyInserters.fromValue(response));
-									
+											.body(BodyInserters.fromValue(response));							
 								} else {
 									logger.error("signIn: Password incorrect!!!");
 									return HandlerUtils.errorAccessDenied("Password incorrect");
@@ -67,19 +66,23 @@ public class AuthHandler {
 	
 	// /api/auth/signup
 	public Mono<ServerResponse> signUp(ServerRequest request) {
-		Mono<User> userMono = request.bodyToMono(User.class);
+		Mono<User> signupRequest = request.bodyToMono(User.class);
 
+		logger.info("REQUEST:/api/auth/signup received");
+		
 		// prepare our new user by encrypting the given password
-		Mono<User> newUser = userMono.map(user -> {
+		Mono<User> newUser = signupRequest.map(user -> {
 			user.setPassword(passwordEncoder.encode(user.getPassword()));
 			return user;
 		});
+		
 		// return the saved user if it didn't exist already, otherwise send an error response
-		return newUser.flatMap(user -> userService.getUserByUsername(user.getUserName())
-				.flatMap(foundUser -> HandlerUtils.errorBadRequest("This username already exists") 
-				.switchIfEmpty(ServerResponse.created(null)
-						.contentType(MediaType.APPLICATION_JSON)
-						.body(userService.saveUser(user),User.class))));
+		Mono<ServerResponse> response = newUser.log()
+				.flatMap(user -> userService.getUserByUsername(user.getUsername())
+						.flatMap(foundUser -> HandlerUtils.errorBadRequest("This username already exists")) 
+						.switchIfEmpty(ServerResponse.created(null).contentType(MediaType.APPLICATION_JSON)
+								.body(userService.saveUser(user),User.class)));		
+		return response;
 
 	}
 

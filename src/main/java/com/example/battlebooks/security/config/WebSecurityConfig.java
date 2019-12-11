@@ -3,9 +3,7 @@ package com.example.battlebooks.security.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
@@ -14,8 +12,6 @@ import org.springframework.security.web.server.csrf.WebSessionServerCsrfTokenRep
 
 import com.example.battlebooks.security.AuthenticationManager;
 import com.example.battlebooks.security.SecurityContextRepository;
-
-import reactor.core.publisher.Mono;
 
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
@@ -39,7 +35,7 @@ public class WebSecurityConfig {
 	@Bean
 	public SecurityWebFilterChain securitygWebFilterChain(ServerHttpSecurity http) {
 		String[] permittedPaths = new String[] {"/api/auth/signin", "/api/auth/signup"};
-		
+	    
 		return http
 		.csrf().disable()
 		.authenticationManager(authenticationManager)

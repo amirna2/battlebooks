@@ -33,10 +33,10 @@ public class TestUserRepository {
 	
 	private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-	List<User> users = Arrays.asList(
-			new User("0001", "amirnathoo", passwordEncoder.encode("password"), Role.ROLE_ADMIN.name(), "Amir Nathoo", "Team Blue"),
-			new User("0002", "cecenathoo", passwordEncoder.encode("password"), Role.ROLE_USER.name(), "Cece Nathoo", "Team Blue"),
-			new User("0003", "hugonathoo", passwordEncoder.encode("password"), Role.ROLE_USER.name(), "Hugo Nathoo", "Team Woof"));
+    List<User> users = Arrays.asList(
+            new User("0001", "amirnathoo", passwordEncoder.encode("password"), Role.ROLE_ADMIN.getAuthority(), "Amir Nathoo", "Team Blue"),
+            new User("0002", "cecenathoo", passwordEncoder.encode("password"), Role.ROLE_STUDENT.getAuthority(), "Cece Nathoo", "Team Blue"),
+            new User("0003", "hugonathoo", passwordEncoder.encode("password"), Role.ROLE_STUDENT.getAuthority(), "Hugo Nathoo", "Team Woof"));
 	
 	
 	@AfterAll 
@@ -67,7 +67,7 @@ public class TestUserRepository {
     
     @Test
     public void findByUserName() {
-        Mono<User> userMono = userRepo.findByUserName("cecenathoo");
+        Mono<User> userMono = userRepo.findByUsername("cecenathoo");
         
         StepVerifier.create(userMono)
         .expectSubscription()
@@ -76,8 +76,8 @@ public class TestUserRepository {
     }
     
     @Test
-    public void findByTeamName() {
-        Flux<User> userFlux = userRepo.findByTeamName("Team Blue");
+    public void findByTeam() {
+        Flux<User> userFlux = userRepo.findByTeam("Team Blue");
         
         StepVerifier.create(userFlux)
         .expectSubscription()

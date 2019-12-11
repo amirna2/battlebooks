@@ -52,10 +52,10 @@ public class TestAuthHandler {
 
 	private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-	List<User> users = Arrays.asList(
-			new User("0001", "amirnathoo", passwordEncoder.encode("password"), Role.ROLE_ADMIN.name(), "Amir Nathoo", "Team Blue"),
-			new User("0002", "cecenathoo", passwordEncoder.encode("password"), Role.ROLE_USER.name(), "Cece Nathoo", "Team Blue"),
-			new User("0003", "hugonathoo", passwordEncoder.encode("password"), Role.ROLE_USER.name(), "Hugo Nathoo", "Team Woof"));
+    List<User> users = Arrays.asList(
+            new User("0001", "amirnathoo", passwordEncoder.encode("password"), Role.ROLE_ADMIN.getAuthority(), "Amir Nathoo", "Team Blue"),
+            new User("0002", "cecenathoo", passwordEncoder.encode("password"), Role.ROLE_STUDENT.getAuthority(), "Cece Nathoo", "Team Blue"),
+            new User("0003", "hugonathoo", passwordEncoder.encode("password"), Role.ROLE_STUDENT.getAuthority(), "Hugo Nathoo", "Team Woof"));
 
 
 	@AfterAll 
@@ -110,7 +110,7 @@ public class TestAuthHandler {
 
 	@Test
 	public void testSignUp_whenValidUser_thenReturnStatusCreated() {
-		User user = new User("0004", "beanathoo", "password", Role.ROLE_USER.name(), "Bea Nathoo", "Team Purrr");
+		User user = new User("0004", "beanathoo", "password", Role.ROLE_STUDENT.getAuthority(), "Bea Nathoo", "Team Purrr");
 
 		User created = webTestClient.post()
 				.uri(HandlerUtils.API_AUTH.concat("/signup"))

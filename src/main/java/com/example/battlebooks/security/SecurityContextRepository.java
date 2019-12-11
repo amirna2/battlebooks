@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
+
 import reactor.core.publisher.Mono;
 
 @Component
@@ -40,6 +41,7 @@ public class SecurityContextRepository implements ServerSecurityContextRepositor
 			authToken = authHeader.replace(TOKEN_PREFIX, "");
 		}
 		
+		logger.info("load() for request:{} authToken:{}",swe.getRequest(),authToken);
 		if (authToken != null) {
 			Authentication auth = new UsernamePasswordAuthenticationToken(authToken, authToken);
 			return this.authenticationManager.authenticate(auth).map((authentication) -> new SecurityContextImpl(authentication));

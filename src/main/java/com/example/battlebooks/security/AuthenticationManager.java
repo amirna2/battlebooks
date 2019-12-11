@@ -1,6 +1,7 @@
 package com.example.battlebooks.security;
 
-import io.jsonwebtoken.Claims;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -8,13 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import io.jsonwebtoken.Claims;
 import reactor.core.publisher.Mono;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class AuthenticationManager implements ReactiveAuthenticationManager {
@@ -38,18 +38,24 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
 		} catch (Exception e) {
 			username = null;
 		}
-		if (username != null && tokenProvider.isTokenExpired(authToken)) {
+		
+	    
+		if (username != null && !tokenProvider.isTokenExpired(authToken)) {
 			Claims claims = tokenProvider.getAllClaimsFromToken(authToken);
-			@SuppressWarnings("unchecked")
-			List<String> rolesMap = claims.get("role", List.class);
-			List<Role> roles = new ArrayList<>();
-			rolesMap.forEach(role -> roles.add(Role.valueOf(role)));
+	         logger.info("Authenticating claims:{} ", claims.toString());
 
+		    logger.info("Authenticating user:{} with authorities:{} ", username, authentication.getAuthorities());
+
+		    // NOTE: For now this assumes single roles only. For multiple roles we need to split the roles string
+		    // and add them all to the set.
+			String roles = claims.get("scopes", String.class);
+		    Set<GrantedAuthority> authorities = new HashSet<> ();
+		    authorities.add (new SimpleGrantedAuthority (roles));
+		    
 			UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
 				username,
 				null,
-				roles.stream().map(authority -> new SimpleGrantedAuthority(authority.name())).collect(Collectors.toList())
-			);
+				authorities);
 			return Mono.just(auth);
 		} else {
 			return Mono.empty();

@@ -22,8 +22,8 @@ public class UserService {
 	public Flux<User> getAllUsers() {
 		return userRepo.findAll();
 	}
-	public Flux<User> getUsersByTeamName(String teamName) {
-		return userRepo.findByTeamName(teamName);
+	public Flux<User> getUsersByTeam(String teamName) {
+		return userRepo.findByTeam(teamName);
 	}
 	
 	public Mono<User> getUserById(String id) {
@@ -31,7 +31,7 @@ public class UserService {
 	}
 	
 	public Mono<User> getUserByUsername(String username) {
-		return userRepo.findByUserName(username);
+		return userRepo.findByUsername(username);
 	}
 	
 	public Mono<Void> deleteUserById(String id) {

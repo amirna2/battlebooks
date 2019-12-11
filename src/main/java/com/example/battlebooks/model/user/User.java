@@ -16,7 +16,7 @@ public class User {
     private String role;
     private String fullname;
     public static final String KEY_TEAM = "team";
-    @TextIndexed private String team;
+    private String team;
     
 	public User() {}
 	

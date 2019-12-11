@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -31,13 +32,7 @@ import com.example.battlebooks.repository.FlashcardRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@ExtendWith(SpringExtension.class)
-@AutoConfigureWebTestClient
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext
-@ActiveProfiles("dev")
-@TestInstance(Lifecycle.PER_CLASS)
-public class TestFlashcardHandler {
+public class TestFlashcardHandler extends TestHandler {
 	
     final Logger logger = LogManager.getLogger(TestBookHandler.class.getSimpleName());
 
@@ -80,11 +75,15 @@ public class TestFlashcardHandler {
 				
 	@AfterAll 
     public void cleanup() {
+		super.cleanup();
+		
 		cardRepo.deleteAll();
     }
     
     @BeforeAll
     public void setupTest() {
+    	super.setupTest();
+    	
     	cardRepo.deleteAll()
             .thenMany(Flux.fromIterable(cardList))
             .flatMap(cardRepo::save)
@@ -105,6 +104,7 @@ public class TestFlashcardHandler {
         		.path(HandlerUtils.API_CARDS)
         		.queryParam(Flashcard.KEY_TYPE, QuestionType.AUTHOR)
         		.build())
+        .header("Authorization", token)
         .exchange()
         .expectStatus().isOk()
         .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -121,6 +121,7 @@ public class TestFlashcardHandler {
         		.path(HandlerUtils.API_CARDS)
         		.queryParam(Flashcard.KEY_TYPE, types)
         		.build())
+        .header("Authorization", token)
         .exchange()
         .expectStatus().isOk()
         .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -141,6 +142,7 @@ public class TestFlashcardHandler {
         		.queryParam(Flashcard.KEY_CATEGORY, categories)
 
         		.build())
+        .header("Authorization", token)
         .exchange()
         .expectStatus().isOk()
         .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -156,6 +158,7 @@ public class TestFlashcardHandler {
         		.queryParam(Flashcard.KEY_TYPE, QuestionType.CONTENT)
         		.queryParam(Flashcard.KEY_CATEGORY, QuestionCategory.CHARACTER)
         		.build())
+        .header("Authorization", token)
         .exchange()
         .expectStatus().isOk()
         .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -170,6 +173,7 @@ public class TestFlashcardHandler {
         		.path(HandlerUtils.API_CARDS)
         		.queryParam(Flashcard.KEY_BOOK, "Frogkisser!")
         		.build())
+        .header("Authorization", token)
         .exchange()
         .expectStatus().isOk()
         .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -185,6 +189,7 @@ public class TestFlashcardHandler {
         		.queryParam(Flashcard.KEY_BOOK, "Frogkisser!")
         		.queryParam(Flashcard.KEY_CATEGORY, QuestionCategory.CHARACTER)
         		.build())
+        .header("Authorization", token)
         .exchange()
         .expectStatus().isOk()
         .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -206,6 +211,7 @@ public class TestFlashcardHandler {
         		.queryParam(Flashcard.KEY_BOOK, "Frogkisser!")
         		.queryParam(Flashcard.KEY_CATEGORY, QuestionCategory.OBJECT+","+QuestionCategory.CHARACTER)
         		.build())
+        .header("Authorization", token)
         .exchange()
         .expectHeader().contentType(MediaType.APPLICATION_JSON)
         .expectBodyList(Flashcard.class)
@@ -227,6 +233,7 @@ public class TestFlashcardHandler {
         		.queryParam(Flashcard.KEY_TYPE, QuestionType.IN_WHICH_BOOK)
         		.queryParam(Flashcard.KEY_CATEGORY, QuestionCategory.CHARACTER)
         		.build())
+        .header("Authorization", token)
         .exchange()
         .expectStatus().is4xxClientError();
     }
@@ -239,6 +246,7 @@ public class TestFlashcardHandler {
         		.queryParam(Flashcard.KEY_TYPE, QuestionType.CONTENT)
         		.queryParam(Flashcard.KEY_CATEGORY, QuestionCategory.EVENT)
         		.build())
+        .header("Authorization", token)
         .exchange()
         .expectStatus().isOk()
         .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -255,6 +263,7 @@ public class TestFlashcardHandler {
         		.queryParam(Flashcard.KEY_CATEGORY, QuestionCategory.DATE)
         		.queryParam(Flashcard.KEY_BOOK, "Port Chicago 50")
         		.build())
+        .header("Authorization", token)
         .exchange()
         .expectStatus().isOk()
         .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -274,6 +283,7 @@ public class TestFlashcardHandler {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .body(Mono.just(card), Flashcard.class)
+                .header("Authorization", token)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(Flashcard.class)
@@ -295,12 +305,13 @@ public class TestFlashcardHandler {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .body(Mono.just(card), Flashcard.class)
+                .header("Authorization", token)
                 .exchange()
                 .expectStatus().is4xxClientError();    
     }
     
     @Test
-    public void testCreateBook() {
+    public void testCreateFlashcard() {
     	 Flashcard card = new Flashcard()
  	    		.setId("0008")
  	    		.setCategory(QuestionCategory.PLACE)
@@ -314,6 +325,7 @@ public class TestFlashcardHandler {
             .uri(HandlerUtils.API_CARDS)
             .contentType(MediaType.APPLICATION_JSON)
             .body(Mono.just(card), Flashcard.class)
+            .header("Authorization", token)
             .exchange()
             .expectStatus().isCreated()
             .expectBody(Flashcard.class)
@@ -324,7 +336,7 @@ public class TestFlashcardHandler {
     }
     
     @Test
-    public void testCreateBook_where_bookTitle_is_invalid() {
+    public void testCreateFlashcard_where_bookTitle_is_invalid() {
     	 Flashcard card = new Flashcard()
  	    		.setId("0008")
  	    		.setCategory(QuestionCategory.PLACE)
@@ -338,8 +350,8 @@ public class TestFlashcardHandler {
             .uri(HandlerUtils.API_CARDS)
             .contentType(MediaType.APPLICATION_JSON)
             .body(Mono.just(card), Flashcard.class)
+            .header("Authorization", token)
             .exchange()
             .expectStatus().isBadRequest();    
     }
-    
 }

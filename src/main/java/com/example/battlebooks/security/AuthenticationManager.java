@@ -44,7 +44,7 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
 			Claims claims = tokenProvider.getAllClaimsFromToken(authToken);
 	         logger.info("Authenticating claims:{} ", claims.toString());
 
-		    logger.info("Authenticating user:{} with authorities:{} ", username, authentication.getAuthorities());
+		    logger.info("Authenticating user:{} with authentication:{}", username, authentication.toString());
 
 		    // NOTE: For now this assumes single roles only. For multiple roles we need to split the roles string
 		    // and add them all to the set.

@@ -9,18 +9,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import com.example.battlebooks.handler.HandlerUtils;
@@ -31,13 +26,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-@ExtendWith(SpringExtension.class)
-@AutoConfigureWebTestClient
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext
-@ActiveProfiles("dev")
-@TestInstance(Lifecycle.PER_CLASS)
-public class TestQuizzHandler {
+public class TestQuizzHandler extends TestHandler {
 
 	final Logger logger = LogManager.getLogger(TestQuizzHandler.class.getSimpleName());
 
@@ -54,11 +43,13 @@ public class TestQuizzHandler {
 	
 	@AfterAll
     public void cleanup() {
+		super.cleanup();
 		quizzRepo.deleteAll();
     }
     
     @BeforeAll
     public void setupTest() {
+    	super.setupTest();
     	quizzRepo.deleteAll()
             .thenMany(Flux.fromIterable(quizzes))
             .flatMap(quizzRepo::save)
@@ -70,9 +61,11 @@ public class TestQuizzHandler {
     
     
     @Test
+    @Order(1)
     public void testGetAllQuizzes() {
         Flux<Quizz> quizzFlux = webTestClient.get()
             .uri(HandlerUtils.API_QUIZZES)
+            .header("Authorization", token)
             .exchange()
             .expectStatus().isOk()
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -86,9 +79,11 @@ public class TestQuizzHandler {
     }
     
     @Test
+    @Order(2)
     public void testGetQuizzById_when_IdExists() {
        Quizz quizz = webTestClient.get()
             .uri(HandlerUtils.API_QUIZZES.concat("/{id}"), "001")
+            .header("Authorization", token)
             .exchange()
             .expectStatus().isOk()
             .expectBody(Quizz.class)
@@ -99,9 +94,11 @@ public class TestQuizzHandler {
     }
 	
     @Test
+    @Order(3)
     public void testGetQuizzById_when_IdDoesNotExist() {
        Quizz quizz = webTestClient.get()
             .uri(HandlerUtils.API_QUIZZES.concat("/{id}"), "100")
+            .header("Authorization", token)
             .exchange()
             .expectStatus().isNotFound()
             .expectBody(Quizz.class)
@@ -112,6 +109,7 @@ public class TestQuizzHandler {
     }
     
     @Test
+    @Order(4)
     public void testCreateQuizz() {
     	Quizz quizz = new Quizz()
     			.setId("200")
@@ -127,6 +125,7 @@ public class TestQuizzHandler {
                 .uri(HandlerUtils.API_QUIZZES)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(quizz), Quizz.class)
+                .header("Authorization", token)
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody(Quizz.class)
@@ -137,24 +136,7 @@ public class TestQuizzHandler {
     }
     
     @Test
-    public void testDeleteQuizz() {
-        webTestClient.delete()
-        .uri(HandlerUtils.API_QUIZZES.concat("/{id}"), "001")
-        .accept(MediaType.APPLICATION_JSON)
-        .exchange()
-        .expectStatus().isNoContent();
-    }
-    
-    @Test
-    public void deleteQuizz_NotAllowed() {
-        webTestClient.delete()
-        .uri(HandlerUtils.API_QUIZZES.concat("/{id}"), "300")
-        .accept(MediaType.APPLICATION_JSON)
-        .exchange()
-        .expectStatus().isEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
-    }
-    
-    @Test
+    @Order(5)
     public void testUpdateQuizz() {
       
     	Quizz quizz = new Quizz("001", Arrays.asList("004", "012","014"), 0, "quizz 1 updated", "A test quizz", Arrays.asList("0002","0004","0005"));
@@ -164,6 +146,7 @@ public class TestQuizzHandler {
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
             .body(Mono.just(quizz), Quizz.class)
+            .header("Authorization", token)
             .exchange()
             .expectStatus().isOk()
             .expectBody(Quizz.class)
@@ -175,18 +158,41 @@ public class TestQuizzHandler {
     }
     
     @Test
+    @Order(6)
     public void testUpdateBook_NotFound() {
       
     	Quizz quizz = new Quizz("999", Arrays.asList("004", "012","014"), 0, "quizz 1 updated", "A test quizz", Arrays.asList("0002","0004","0005"));
-
     	
     	webTestClient.put()
             .uri(HandlerUtils.API_QUIZZES.concat("/{id}"), quizz.getId())
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
             .body(Mono.just(quizz), Quizz.class)
+            .header("Authorization", token)
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.NOT_FOUND);
         	
+    }
+    
+    @Test
+    @Order(7)
+    public void testDeleteQuizz() {
+        webTestClient.delete()
+        .uri(HandlerUtils.API_QUIZZES.concat("/{id}"), "001")
+        .accept(MediaType.APPLICATION_JSON)
+        .header("Authorization", token)
+        .exchange()
+        .expectStatus().isNoContent();
+    }
+    
+    @Test
+    @Order(8)
+    public void deleteQuizz_NotAllowed() {
+        webTestClient.delete()
+        .uri(HandlerUtils.API_QUIZZES.concat("/{id}"), "300")
+        .accept(MediaType.APPLICATION_JSON)
+        .header("Authorization", token)
+        .exchange()
+        .expectStatus().isEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
     }
 }

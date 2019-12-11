@@ -31,13 +31,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-@ExtendWith(SpringExtension.class)
-@AutoConfigureWebTestClient
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext
-@ActiveProfiles("dev")
-@TestInstance(Lifecycle.PER_CLASS)
-public class TestBookHandler {
+public class TestBookHandler extends TestHandler {
 	
     final Logger logger = LogManager.getLogger(TestBookHandler.class.getSimpleName());
 
@@ -68,11 +62,14 @@ public class TestBookHandler {
 				
 	@AfterAll
     public void cleanup() {
+		super.cleanup();
 		bookRepo.deleteAll();
     }
     
     @BeforeAll
     public void setupTest() {
+    	super.setupTest();
+    	
     	bookRepo.deleteAll()
             .thenMany(Flux.fromIterable(books))
             .flatMap(bookRepo::save)
@@ -80,12 +77,14 @@ public class TestBookHandler {
                 logger.info("[setupTest] Saved Book: {} ",book);
             }))
             .blockLast();  // blocking only for testing purposes
+    	
     }
     
     @Test
     public void testGetAllBooks() {
         webTestClient.get()
             .uri(HandlerUtils.API_BOOKS)
+            .header("Authorization", token)
             .exchange()
             .expectStatus().isOk()
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -97,6 +96,7 @@ public class TestBookHandler {
     public void testGetAllBooks_withVerifier() {
         Flux<Book> bookFlux = webTestClient.get()
             .uri(HandlerUtils.API_BOOKS)
+            .header("Authorization", token)
             .exchange()
             .expectStatus().isOk()
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -113,6 +113,7 @@ public class TestBookHandler {
     public void test_GetBookById_when_IdExists() {
        Book book = webTestClient.get()
             .uri(HandlerUtils.API_BOOKS.concat("/{id}"), "004")
+            .header("Authorization", token)
             .exchange()
             .expectStatus().isOk()
             .expectBody(Book.class)
@@ -126,6 +127,7 @@ public class TestBookHandler {
     public void test_GetBookById_when_IdDoesNotExist() {
        Book book = webTestClient.get()
             .uri(HandlerUtils.API_BOOKS.concat("/{id}"), "100")
+            .header("Authorization", token)
             .exchange()
             .expectStatus().is4xxClientError()
             .expectBody(Book.class)
@@ -149,6 +151,7 @@ public class TestBookHandler {
             .uri(HandlerUtils.API_BOOKS)
             .contentType(MediaType.APPLICATION_JSON)
             .body(Mono.just(book), Book.class)
+            .header("Authorization", token)
             .exchange()
             .expectStatus().isCreated()
             .expectBody(Book.class)
@@ -163,6 +166,7 @@ public class TestBookHandler {
         webTestClient.delete()
         .uri(HandlerUtils.API_BOOKS.concat("/{id}"), "004")
         .accept(MediaType.APPLICATION_JSON)
+        .header("Authorization", token)
         .exchange()
         .expectStatus().isNoContent();
     }
@@ -172,6 +176,7 @@ public class TestBookHandler {
         webTestClient.delete()
         .uri(HandlerUtils.API_BOOKS.concat("/{id}"), "300")
         .accept(MediaType.APPLICATION_JSON)
+        .header("Authorization", token)
         .exchange()
         .expectStatus().isEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
     }
@@ -184,6 +189,7 @@ public class TestBookHandler {
             .uri(HandlerUtils.API_BOOKS.concat("/{id}"), book.getId())
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
+            .header("Authorization", token)
             .body(Mono.just(book), Book.class)
             .exchange()
             .expectStatus().isOk()
@@ -203,6 +209,7 @@ public class TestBookHandler {
             .uri(HandlerUtils.API_BOOKS.concat("/{id}"), book.getId())
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
+            .header("Authorization", token)
             .body(Mono.just(book), Book.class)
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.NOT_FOUND);
